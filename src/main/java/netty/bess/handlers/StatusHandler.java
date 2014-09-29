@@ -33,6 +33,9 @@ public class StatusHandler extends SimpleChannelInboundHandler<HttpRequest> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest req) throws Exception {
         if (req.getUri().equals("/status") || req.getUri().equals("/status/")) {
+            String url = req.getUri();
+            controller.IncreaseCount();
+            controller.addToIpMap(ctx);
             responseContent.setLength(0);
             AppendTable();
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK,
@@ -40,6 +43,7 @@ public class StatusHandler extends SimpleChannelInboundHandler<HttpRequest> {
             response.headers().set(CONTENT_TYPE, "text/html");
             response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
             ctx.writeAndFlush(response);
+            controller.addToConnectionDeque(ctx, url);
         } else {
             ctx.fireChannelRead(req);
         }
@@ -83,7 +87,7 @@ public class StatusHandler extends SimpleChannelInboundHandler<HttpRequest> {
                     "</tr>\n");
         }
         responseContent.append("</table>  " + "</p>\n");
-        responseContent.append("<h3> Number of opened connections:   " + CollectorHandler.getConnectionsCount() + "</h3>");
+        responseContent.append("<h3> Number of opened connections:   " + HelloHandler.getConnectionsCount() + "</h3>");
         responseContent.append("<h3>Log of the last 16 processed connections</h3>" +
                 "<table border=\"2\">\n" +
                 "<tr>\n" +
@@ -94,8 +98,8 @@ public class StatusHandler extends SimpleChannelInboundHandler<HttpRequest> {
                 "<th>received_bytes</th>\n" +
                 "<th>speed (bytes/sec)</th>\n" +
                 "</tr>\n");
-        Deque<RequestData> datas = StatisticsController.getLogRequestQue();
-        for (RequestData d : datas) {
+        Deque<RequestData> last16Connections = StatisticsController.getLogRequestQue();
+        for (RequestData d : last16Connections) {
             responseContent.append("<tr>\n" +
                     "<td>" + d.getIp() + "</td>\n" +
                     "<td>" + d.getUrl() + "</td>\n" +

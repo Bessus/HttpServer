@@ -16,7 +16,7 @@ import static io.netty.handler.codec.http.HttpVersion.*;
  * Created by Bess on 23.09.14.
  */
 public class RedirectHandler extends SimpleChannelInboundHandler<HttpRequest> {
-
+    private static StatisticsController controller = new StatisticsController();
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest req) throws Exception {
         String requestHTTP = req.getUri();
@@ -29,6 +29,10 @@ public class RedirectHandler extends SimpleChannelInboundHandler<HttpRequest> {
             FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, FOUND);
             fullHttpResponse.headers().set(LOCATION, urlToRedirect);
             ctx.writeAndFlush(fullHttpResponse).addListener(ChannelFutureListener.CLOSE);
+            String url = req.getUri();
+            controller.IncreaseCount();
+            controller.addToIpMap(ctx);
+            controller.addToConnectionDeque(ctx, url);
             StatisticsController.processRedirectRequest(urlToRedirect);
         } else {
             ctx.fireChannelRead(req);

@@ -17,14 +17,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class StatisticsController {
 
-
-    private static Map<String, IpData> ipMap = new ConcurrentHashMap(); //counts every request
-    private static Map<String, Integer> urlMap = new ConcurrentHashMap(); //counts redirection on each url
-    private static Deque<RequestData> logRequestQue = new ConcurrentLinkedDeque(); // Deque of last 16 requests
+    private static Map<String, IpData> ipMap = new ConcurrentHashMap<>(); //counts every request
+    private static Map<String, Integer> urlMap = new ConcurrentHashMap<>(); //counts redirection on each url
+    private static Deque<RequestData> logRequestQue = new ConcurrentLinkedDeque<>(); // Deque of last 16 requests
     private static AtomicInteger uniqueIpCount = new AtomicInteger(); // number of the unique IP requests
     private static AtomicInteger count = new AtomicInteger(); // total request number
 
-    public void processConnectionsLog(ChannelHandlerContext ctx, String url) {
+    public void addToConnectionDeque(ChannelHandlerContext ctx, String url) {
         //getting an instance of ChannelTrafficShapingHandler for bandwidth monitoring
         ChannelTrafficShapingHandler ch = (ChannelTrafficShapingHandler) ctx.channel().pipeline().get("shaping-handler");
         ch.trafficCounter().stop();  //Stop the monitoring process
@@ -46,7 +45,7 @@ public class StatisticsController {
         count.incrementAndGet();
     }
     //this method is called in order to count every request
-    public void ProcessRequestParams(ChannelHandlerContext ctx) {
+    public void addToIpMap(ChannelHandlerContext ctx) {
 
         String clientIP = getClientIp(ctx);
 
@@ -68,8 +67,7 @@ public class StatisticsController {
     }
 
     private String getClientIp(ChannelHandlerContext ctx) {
-        String clientIP = ((InetSocketAddress) ctx.channel().remoteAddress()).getHostString();
-        return clientIP;
+        return ((InetSocketAddress) ctx.channel().remoteAddress()).getHostString();
     }
 
     // ---- getters ----
