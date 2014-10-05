@@ -1,6 +1,7 @@
 package netty.bess.handlers;
 
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
@@ -40,7 +41,7 @@ public class HelloHandler extends SimpleChannelInboundHandler<HttpRequest> {
             Unpooled.unreleasableBuffer(Unpooled.copiedBuffer(responseContent, CharsetUtil.UTF_8)));
             response.headers().set(CONTENT_TYPE, "text/html");
             response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
-            ctx.writeAndFlush(response);
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);;
             String url = req.getUri();
             controller.IncreaseCount();
             controller.addToIpMap(ctx);

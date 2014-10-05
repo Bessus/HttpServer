@@ -12,7 +12,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.*;
 
 /**
- * redirect requests which contains "redirect?url="
+ * redirect requests which contain "redirect?url="
  * Created by Bess on 23.09.14.
  */
 public class RedirectHandler extends SimpleChannelInboundHandler<HttpRequest> {

@@ -3,20 +3,21 @@ package netty.bess.stat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class IpData {
 
-    private int count;
+    private AtomicInteger count;
     private String time;
 
 
     public IpData() {
         this.time=CurrentTimeStamp();
-        count=1;
+        count=new AtomicInteger(1);
     }
 
     public void incrementCount ()  {
-        count++;
+        count.incrementAndGet();
     }
 
     public void updateTime() {
@@ -30,7 +31,7 @@ public class IpData {
         return formatCurrentTime;
     }
 
-    public int getCount() {
+    public AtomicInteger getCount() {
         return count;
     }
 

@@ -31,7 +31,6 @@ public class StatisticsController {
         if (logRequestQue.size() < 16) {
             logRequestQue.addLast(new RequestData(getClientIp(ctx), url, ch.trafficCounter().cumulativeWrittenBytes(),
                     ch.trafficCounter().cumulativeReadBytes(), ch.trafficCounter().lastWriteThroughput()));
-            System.out.println(ch.trafficCounter().lastWriteThroughput());
         } else {
             logRequestQue.removeFirst();
             logRequestQue.addLast(new RequestData(getClientIp(ctx),url, ch.trafficCounter().cumulativeWrittenBytes(),
@@ -47,14 +46,15 @@ public class StatisticsController {
     //this method is called in order to count every request
     public void addToIpMap(ChannelHandlerContext ctx) {
 
-        String clientIP = getClientIp(ctx);
-
+        String clientIP = ((InetSocketAddress) ctx.channel().remoteAddress()).getHostString();
+        synchronized (ipMap){
         if (!ipMap.containsKey(clientIP)) {//if IP is new --> put it in map with default count 1 and current time
             ipMap.put(clientIP, new IpData());
             uniqueIpCount.incrementAndGet();
         } else { // if IP is not new --> update time and increment count
             ipMap.get(clientIP).incrementCount();
             ipMap.get(clientIP).updateTime(); // in order to know the time of last request
+        }
         }
     }
     //this method is called in RedirectHandler in order to count redirection on each url
